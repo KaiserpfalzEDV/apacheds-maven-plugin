@@ -1,0 +1,8 @@
+<component-sets>
+    <components>
+        <component>
+            <role>de.kaiserpfalzEdv.maven.apacheds.ApacheDsLifecycle</role>
+            <implementation>de.kaiserpfalzEdv.maven.apacheds.ApacheDsLifecycle</implementation>
+        </component>
+    </components>
+</component-sets>
