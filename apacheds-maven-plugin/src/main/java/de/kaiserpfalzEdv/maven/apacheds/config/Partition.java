@@ -16,11 +16,25 @@
 
 package de.kaiserpfalzEdv.maven.apacheds.config;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.directory.api.ldap.model.entry.DefaultEntry;
+import org.apache.directory.api.ldap.model.entry.Entry;
+import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.directory.api.ldap.model.exception.LdapInvalidDnException;
 import org.apache.directory.api.ldap.model.name.Dn;
+import org.apache.directory.api.ldap.model.name.Rdn;
+import org.apache.directory.server.core.api.CoreSession;
 import org.apache.directory.server.core.api.DirectoryService;
+import org.apache.directory.server.core.partition.impl.avl.AvlPartition;
+import org.apache.directory.server.core.partition.impl.btree.AbstractBTreePartition;
 import org.apache.directory.server.core.partition.impl.btree.jdbm.JdbmPartition;
+import org.apache.maven.plugin.logging.Log;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author klenkes &lt;rlichti@kaiserpfalz-edv.de&gt;
@@ -34,25 +48,53 @@ public class Partition {
     private String dn;
 
     /** The type of the partition. */
-    private String type;
+    private String type = "jdbm";
+
+    /** The data to load into the given partition. */
+    private File ldif;
+
+    /** An ordered list of ldif files/directories to load. */
+    private final List<File> ldifDirectories = new ArrayList<>();
+
+    /** A flag if a partition already existing should be deleted or used as is. */
+    private boolean replaceExisting = false;
+
+
+    private Log logger;
 
 
     /**
      * Creates the partition specified by ID and DN for the given schema manager within service.
+     * @param logger The Maven logger.
      * @param service The directory service this partition should be created in.
      * @return The partition.
      */
-    public org.apache.directory.server.core.api.partition.Partition createPartition(final DirectoryService service) {
+    public org.apache.directory.server.core.api.partition.Partition createPartition(final Log logger, final DirectoryService service) throws Exception {
+        this.logger = logger;
 
-        org.apache.directory.server.core.api.partition.Partition result = createPartitionOfCorrectType(service);
+        AbstractBTreePartition result = createPartitionOfCorrectType(service);
 
         result.setId(id);
 
         try {
             result.setSuffixDn(getDnObject());
+
+            File partitionPath = new File(service.getInstanceLayout().getPartitionsDirectory(), id);
+            result.setPartitionPath(partitionPath.toURI());
+
+            if (partitionPath.exists() && replaceExisting) {
+                FileUtils.deleteDirectory(partitionPath);
+            }
+
+            Entry contextEntry = new DefaultEntry(service.getSchemaManager(), getDnObject());
+            contextEntry.put("objectClass", "top", getObjectClassFromDn());
+
+            result.setContextEntry(contextEntry);
         } catch (LdapInvalidDnException e) {
             throw new IllegalStateException("Can't set DN to partition!", e);
         }
+
+        loadLdifs(service.getSession(), result);
 
         return result;
     }
@@ -61,9 +103,28 @@ public class Partition {
      * @param service The directory service this partition should be created for.
      * @return The partition of correct type.
      */
-    private JdbmPartition createPartitionOfCorrectType(final DirectoryService service) {
-        return new JdbmPartition(service.getSchemaManager());
+    private AbstractBTreePartition createPartitionOfCorrectType(final DirectoryService service) {
+        if ("jdbm".equalsIgnoreCase(type)) {
+            return new JdbmPartition(service.getSchemaManager());
+        } else if ("avl".equalsIgnoreCase(type)) {
+            return new AvlPartition(service.getSchemaManager());
+        }
+
+        throw new IllegalStateException("There is no type '" + type + "' defined. Please use 'jdbm' or 'avl'.");
     }
+
+
+    private void loadLdifs(final CoreSession session, final AbstractBTreePartition partition)
+            throws FileNotFoundException, LdapException {
+        LdifLoader loader = new LdifLoader(session, partition);
+
+        if (ldif != null) {
+            ldifDirectories.add(ldif);
+        }
+
+        loader.loadLdifs(logger, ldifDirectories);
+    }
+
 
 
     /**
@@ -79,6 +140,38 @@ public class Partition {
     public void setId(final String id) {
         this.id = id;
     }
+
+
+    public File getLdif() {
+        return ldif;
+    }
+
+    public void setLdif(final File ldif) {
+        this.ldif = ldif;
+    }
+
+
+    public List<File> getLdifDirectories() {
+        return ldifDirectories;
+    }
+
+    public void setLdifDirectories(final List<File> ldifDirectories) {
+        this.ldifDirectories.clear();
+
+        if (ldifDirectories != null) {
+            this.ldifDirectories.addAll(ldifDirectories);
+        }
+    }
+
+
+    public boolean getReplaceExisting() {
+        return replaceExisting;
+    }
+
+    public void setReplaceExisting(final boolean replaceExisting) {
+        this.replaceExisting = replaceExisting;
+    }
+
 
     /**
      * @return The DN of the partition base.
@@ -103,12 +196,38 @@ public class Partition {
         }
     }
 
+
+    /**
+     * @return The name of the object class according the baseDN.
+     * @throws IllegalStateException If the DN is not set or is invalid.
+     */
+    private String getObjectClassFromDn() {
+        if (dn == null) {
+            throw new IllegalStateException("No DN set!");
+        }
+
+        Rdn rdn = getDnObject().getRdn();
+
+        if ("dc".equalsIgnoreCase(rdn.getType())) {
+            return "domain";
+        } else if ("o".equalsIgnoreCase(rdn.getType())) {
+            return "organization";
+        } else if ("ou".equalsIgnoreCase(rdn.getType())) {
+            return "organizationalUnit";
+        } else if ("c".equalsIgnoreCase(rdn.getType())) {
+            return "country";
+        }
+
+        throw new IllegalStateException("Illegal context entry type. Only 'dc', 'o', 'ou', or 'c' are allowed (rdn is: " + rdn.getType() + "!");
+    }
+
     /**
      * @param dn The unique DN of the partition base.
      */
     public void setDn(final String dn) {
         this.dn = dn;
     }
+
 
     /**
      * @return The type of the partition.

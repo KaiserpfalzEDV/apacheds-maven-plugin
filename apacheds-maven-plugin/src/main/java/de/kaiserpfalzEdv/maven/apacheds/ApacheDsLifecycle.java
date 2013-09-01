@@ -1,28 +1,36 @@
+/*
+ * Copyright 2013 Kaiserpfalz EDV-Service, Nicol und Roland Lichti.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package de.kaiserpfalzEdv.maven.apacheds;
 
+import de.kaiserpfalzEdv.maven.apacheds.config.LdifLoader;
 import de.kaiserpfalzEdv.maven.apacheds.config.Partition;
-import org.apache.directory.api.ldap.model.exception.LdapException;
-import org.apache.directory.api.ldap.model.ldif.LdifEntry;
-import org.apache.directory.api.ldap.model.ldif.LdifReader;
 import org.apache.directory.server.configuration.ApacheDS;
 import org.apache.directory.server.core.api.DirectoryService;
 import org.apache.directory.server.core.api.InstanceLayout;
-import org.apache.directory.server.core.api.interceptor.context.AddOperationContext;
-import org.apache.directory.server.core.api.interceptor.context.ModifyOperationContext;
 import org.apache.directory.server.core.factory.DefaultDirectoryServiceFactory;
 import org.apache.directory.server.core.factory.DirectoryServiceFactory;
 import org.apache.directory.server.ldap.LdapServer;
 import org.apache.directory.server.protocol.shared.transport.TcpTransport;
 import org.apache.maven.plugin.logging.Log;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileFilter;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * @author klenkes
@@ -40,6 +48,7 @@ public class ApacheDsLifecycle {
 
     private File workingDirectory;
     private File schema;
+    private final List<File> schemaDirectories = new ArrayList<>();
     private File preload;
 
     private final ArrayList<Partition> partitions = new ArrayList<>();
@@ -58,11 +67,9 @@ public class ApacheDsLifecycle {
 
         logger.debug(directory.getInstanceLayout().toString());
 
-        if (schema != null) {
-            loadAdditionalSchema(schema);
-        }
-
         directoryFactory.init("LDAP Integration Tester");
+
+        loadLdapSchema(logger);
 
         ldapServer = new LdapServer();
         ldapServer.setTransports(new TcpTransport(port));
@@ -78,74 +85,27 @@ public class ApacheDsLifecycle {
     }
 
 
+    private void loadLdapSchema(final Log logger) throws Exception {
+        if (schema != null) {
+            schemaDirectories.add(schema);
+        }
+
+        if (!schemaDirectories.isEmpty()) {
+            logger.info("Loading schema: " + schemaDirectories);
+
+            LdifLoader loader = new LdifLoader(directory.getSession(), directory.getSchemaPartition());
+            loader.loadLdifs(logger, schemaDirectories);
+        }
+    }
+
+
     private void loadAdditionalPartitions() throws Exception {
         if (!partitions.isEmpty()) {
             for (Partition p : partitions) {
                 logger.info("Adding partition: " + p);
 
-                if (directory.isStarted()) {
-                    logger.info("Directory is started ...");
-                }
-
-                directory.addPartition(p.createPartition(directory));
+                directory.addPartition(p.createPartition(logger, directory));
             }
-        }
-    }
-
-
-    private void loadAdditionalSchema(final File schema) throws FileNotFoundException, LdapException {
-        if (!schema.isDirectory() && schema.getName().endsWith(".ldif")) {
-            loadAdditionalSchemaFile(schema);
-        } else {
-            loadSchemasInDirectory(schema);
-            loadSchemasFromSubdirectories(schema);
-        }
-    }
-
-    private void loadSchemasInDirectory(final File schema) throws FileNotFoundException, LdapException {
-        for (File schemaFile : schema.listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(final File dir, final String name) {
-                return name.endsWith(".ldif") || name.endsWith(".ldiff");
-            }
-        })) {
-            loadAdditionalSchema(schemaFile);
-        }
-    }
-
-    private void loadSchemasFromSubdirectories(final File schema) throws FileNotFoundException, LdapException {
-        for (File schemaDir : schema.listFiles(new FileFilter() {
-            @Override
-            public boolean accept(final File pathname) {
-                return pathname.isDirectory();
-            }
-        })) {
-            loadAdditionalSchema(schemaDir);
-        }
-    }
-
-    private void loadAdditionalSchemaFile(final File schema) {
-        try {
-            LdifReader ldifReader = new LdifReader();
-
-            for (LdifEntry entry : ldifReader.parseLdif(new BufferedReader(new FileReader(schema)))) {
-                logger.debug("LDIF entry: " + entry);
-
-                if (entry.isChangeAdd()) {
-                    directory.getSchemaPartition().add(
-                            new AddOperationContext(directory.getSession(), entry.getEntry())
-                    );
-                } else if (entry.isChangeModify()) {
-                    directory.getSchemaPartition().modify(
-                            new ModifyOperationContext(directory.getSession(), entry.getDn(), entry.getModifications())
-                    );
-                } else {
-                    throw new IllegalStateException("Only additions and modifications are possible. LDIF entry is: "
-                            + entry);
-                }
-            }
-        } catch (Exception e) {
-            logger.error(e.getClass().getSimpleName() + " caught: " + e.getMessage(), e);
         }
     }
 
@@ -198,6 +158,14 @@ public class ApacheDsLifecycle {
     public void addPartitions(final Collection<Partition> partitions) {
         if (partitions != null) {
             this.partitions.addAll(partitions);
+        }
+    }
+
+    public void setSchemaDirectories(final List<File> schemaDirectories) {
+        this.schemaDirectories.clear();
+
+        if (schemaDirectories != null) {
+            this.schemaDirectories.addAll(schemaDirectories);
         }
     }
 

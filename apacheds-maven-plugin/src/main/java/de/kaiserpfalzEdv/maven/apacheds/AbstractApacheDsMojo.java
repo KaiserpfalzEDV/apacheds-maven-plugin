@@ -22,6 +22,7 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 public abstract class AbstractApacheDsMojo extends AbstractMojo {
@@ -50,10 +51,21 @@ public abstract class AbstractApacheDsMojo extends AbstractMojo {
     protected File schema;
 
     /**
+     * @parameter optional="true" expression="${ldap.schemaDirectories}"
+     */
+    protected final List<File> schemaDirectories = new ArrayList<>();
+
+    /**
      * An LDIF file or directory to preload the LDAP directory against.
      *
      * @parameter optional="true" expression="${ldap.ldifDirectory}"
-     */protected File ldif;
+     */
+    protected File ldif;
+
+    /**
+     * @parameter optional="true" expression="${ldap.ldifDirectories}"
+     */
+    protected final List<File> ldifDirectories = new ArrayList<>();
 
     /**
      * The partitions to be added to the Apache Server

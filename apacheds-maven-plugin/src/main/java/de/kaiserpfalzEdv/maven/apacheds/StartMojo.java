@@ -44,12 +44,15 @@ public class StartMojo extends AbstractApacheDsMojo {
             service.setWorkingDirectory(workingDirectory);
             service.setPort(port);
             service.setAdditionalSchema(schema);
+            service.setSchemaDirectories(schemaDirectories);
             service.setPreloadLdif(ldif);
             service.addPartitions(partitions);
 
             service.init(getLog());
 
             service.start(getLog());
+        } catch (MojoExecutionException e) {
+            throw e;
         } catch (Exception e) {
             getLog().error(e.getClass().getSimpleName() + " caught: " + e.getMessage(), e);
 
