@@ -30,7 +30,6 @@
 
     <properties>
         <skipTests>false</skipTests>
-        <skipUnitTests>${skipTests}</skipUnitTests>
         <skipIntegrationTests>${skipTests}</skipIntegrationTests>
     </properties>
 
@@ -38,8 +37,6 @@
     <description>
         A plugin for using an apache directory server for integration testing.
     </description>
-
-    <url>http://devzone.kaiserpfalz-edv.de/projects/apacheds-maven-plugin/${project.version}</url>
 
     <distributionManagement>
         <repository>
@@ -61,36 +58,12 @@
         <url>http://issues.kaiserpfalz-edv.de/browse/ADS</url>
     </issueManagement>
 
-    <scm>
-        <connection>scm:git:ssh://devzone.kaiserpfalz-edv.de/data/git/apacheds-maven-plugin.git</connection>
-        <developerConnection>scm:git:ssh://devzone.kaiserpfalz-edv.de/data/git/apacheds-maven-plugin.git</developerConnection>
-    </scm>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>de.kaiserpfalzEdv</groupId>
-                <artifactId>kp-test-bom</artifactId>
-                <version>${kes.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>de.kaiserpfalzEdv</groupId>
-                <artifactId>kp-misc-bom</artifactId>
-                <version>${kes.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
 
     <dependencies>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
+            <version>1.0.9</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -119,14 +92,16 @@
                     <workingDirectory>${project.build.directory}/apache-ds</workingDirectory>
                     <schemaDirectories>
                         <schemaDirectory>${project.build.testOutputDirectory}/schema.ldif</schemaDirectory>
-                        <schemaDirectory>${project.build.testOutputDirectory}/schema2.ldif</schemaDirectory>
                     </schemaDirectories>
                     <partitions>
                         <partition>
                             <id>TEST-LDAP</id>
                             <dn>dc=jdbm,dc=com</dn>
                             <type>jdbm</type>
-                            <ldif>${project.build.testOutputDirectory}/data.ldif</ldif>
+                            <ldifDirectories>
+                                <ldifDirectory>${project.build.testOutputDirectory}/data.ldif</ldifDirectory>
+                            </ldifDirectories>
+                            <replaceExisting>false</replaceExisting>
                         </partition>
                         <partition>
                             <id>TEST-AVL</id>

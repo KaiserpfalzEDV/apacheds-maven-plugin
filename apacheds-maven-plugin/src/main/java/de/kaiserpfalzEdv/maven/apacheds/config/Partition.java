@@ -29,6 +29,7 @@ import org.apache.directory.server.core.api.DirectoryService;
 import org.apache.directory.server.core.partition.impl.avl.AvlPartition;
 import org.apache.directory.server.core.partition.impl.btree.AbstractBTreePartition;
 import org.apache.directory.server.core.partition.impl.btree.jdbm.JdbmPartition;
+import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 
 import java.io.File;
@@ -54,7 +55,7 @@ public class Partition {
     private File ldif;
 
     /** An ordered list of ldif files/directories to load. */
-    private final List<File> ldifDirectories = new ArrayList<>();
+    private final List<File> ldifDirectories = new ArrayList<File>();
 
     /** A flag if a partition already existing should be deleted or used as is. */
     private boolean replaceExisting = false;
@@ -115,14 +116,18 @@ public class Partition {
 
 
     private void loadLdifs(final CoreSession session, final AbstractBTreePartition partition)
-            throws FileNotFoundException, LdapException {
-        LdifLoader loader = new LdifLoader(session, partition);
+            throws FileNotFoundException, LdapException, MojoExecutionException {
 
         if (ldif != null) {
             ldifDirectories.add(ldif);
         }
 
-        loader.loadLdifs(logger, ldifDirectories);
+
+        if (!ldifDirectories.isEmpty()) {
+            logger.info("- Loading data: " + ldifDirectories);
+
+            new LdifLoader(session, partition).loadLdifs(logger, ldifDirectories);
+        }
     }
 
 

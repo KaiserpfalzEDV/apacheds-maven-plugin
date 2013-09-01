@@ -48,10 +48,10 @@ public class ApacheDsLifecycle {
 
     private File workingDirectory;
     private File schema;
-    private final List<File> schemaDirectories = new ArrayList<>();
+    private final List<File> schemaDirectories = new ArrayList<File>();
     private File preload;
 
-    private final ArrayList<Partition> partitions = new ArrayList<>();
+    private final ArrayList<Partition> partitions = new ArrayList<Partition>();
 
     public void init(final Log logger) throws Exception {
         logger.info("Initializing Apache Directory Server ...");
@@ -80,6 +80,7 @@ public class ApacheDsLifecycle {
         loadAdditionalPartitions();
 
         if (preload != null) {
+            logger.info("Setting LDIF preload to: " + preload);
             server.setLdifDirectory(preload);
         }
     }
