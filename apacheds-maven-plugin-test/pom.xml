@@ -19,7 +19,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>de.kaiserpfalzEdv.maven</groupId>
+        <groupId>de.kaiserpfalz-edv.maven</groupId>
         <artifactId>apacheds-maven-plugin-parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
@@ -33,31 +33,10 @@
         <skipIntegrationTests>${skipTests}</skipIntegrationTests>
     </properties>
 
-    <name>ApacheDS Maven Plugin Integration Test</name>
+    <name>KP MavenTools - ApacheDS Maven Plugin: Integration Test</name>
     <description>
         A plugin for using an apache directory server for integration testing.
     </description>
-
-    <distributionManagement>
-        <repository>
-            <id>internal</id>
-            <url>http://repository.kaiserpfalz-edv.de/content/repositories/releases/</url>
-        </repository>
-        <snapshotRepository>
-            <id>snapshot</id>
-            <url>http://repository.kaiserpfalz-edv.de/content/repositories/snapshots/</url>
-        </snapshotRepository>
-        <site>
-            <id>kp-website</id>
-            <url>dav:http://dav.kaiserpfalz-edv.de:443/projects/kp-commons/${project.version}</url>
-        </site>
-    </distributionManagement>
-
-    <issueManagement>
-        <system>JIRA</system>
-        <url>http://issues.kaiserpfalz-edv.de/browse/ADS</url>
-    </issueManagement>
-
 
     <dependencies>
         <dependency>

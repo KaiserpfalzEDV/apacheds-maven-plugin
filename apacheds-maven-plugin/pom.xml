@@ -19,7 +19,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>de.kaiserpfalzEdv.maven</groupId>
+        <groupId>de.kaiserpfalz-edv.maven</groupId>
         <artifactId>apacheds-maven-plugin-parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
@@ -28,17 +28,10 @@
     <artifactId>apacheds-maven-plugin</artifactId>
     <packaging>maven-plugin</packaging>
 
-    <name>ApacheDS Maven Plugin</name>
+    <name>KP MavenTools - ApacheDS Maven Plugin: The Plugin</name>
     <description>
         A plugin for using an apache directory server for integration testing.
     </description>
-
-    <url>http://devzone.kaiserpfalz-edv.de/projects/apacheds-maven-plugin/${project.version}</url>
-
-    <issueManagement>
-        <system>JIRA</system>
-        <url>http://issues.kaiserpfalz-edv.de/browse/ADS</url>
-    </issueManagement>
 
     <dependencies>
         <dependency>

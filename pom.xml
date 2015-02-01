@@ -18,11 +18,22 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>de.kaiserpfalzEdv.maven</groupId>
+    <groupId>de.kaiserpfalz-edv.maven</groupId>
     <artifactId>apacheds-maven-plugin-parent</artifactId>
     <packaging>pom</packaging>
     <version>1.0.0-SNAPSHOT</version>
 
+    <name>KP MavenTools - ApacheDS Maven Plugin</name>
+    
+    <description>
+        A small plugin to start, stop and configure an integration test apacheds instance.
+    </description>
+    
+    <url>http://docu.kaiserpfalz-edv.de/maventools/apacheds-maven-plugin/</url>
+    
+    <inceptionYear>2012</inceptionYear>
+
+    
     <modules>
         <module>apacheds-maven-plugin</module>
         <module>apacheds-maven-plugin-test</module>
@@ -45,6 +56,10 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>2.3.2</version>
+                <configuration>
+                    <compilerVersion>${targetJdk}</compilerVersion>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
             </plugin>
 
             <plugin>
@@ -68,8 +83,34 @@
             </plugin>
         </plugins>
     </build>
+
+
+    <scm>
+        <connection>scm:git:ssh://github.com/KaiserpfalzEdv/apacheds-maven-plugin.git</connection>
+        <developerConnection>scm:git:ssh://github.com/KaiserpfalzEdv/apacheds-maven-plugin.git</developerConnection>
+    </scm>
     
-    <inceptionYear>2012</inceptionYear>
+    
+    <distributionManagement>
+        <site>
+            <id>kp-docu</id>
+            <name>Kaiserpfalz EDV-Service Documentation</name>
+            <url>http://docu.kaiserpfalz-edv.de/maventools/apacheds-maven-plugin/</url>
+        </site>
+        <repository>
+            <id>kp-release</id>
+            <name>Kaiserfalz EDV-Service Releases</name>
+            <url>https://devzone.kaiserpfalz-edv.de/ci/plugin/repository/everything/</url>
+        </repository>
+        <snapshotRepository>
+            <id>kp-snapshots</id>
+            <name>Kaiserfalz EDV-Service Snapshots</name>
+            <url>https://devzone.kaiserpfalz-edv.de/ci/plugin/repository/everything/</url>
+        </snapshotRepository>
+    </distributionManagement>
+    
+
+
     <mailingLists>
         <mailingList>
             <name>KP MavenTools - Announce</name>
@@ -120,9 +161,4 @@
         <system>Jenkins</system>
         <url>https://devzone.kaiserpfalz-edv.de/ci/</url>
     </ciManagement>
-
-    <scm>
-        <connection>scm:git:ssh://github.com/KaiserpfalzEdv/apacheds-maven-plugin.git</connection>
-        <developerConnection>scm:git:ssh://github.com/KaiserpfalzEdv/apacheds-maven-plugin.git</developerConnection>
-    </scm>
 </project>
