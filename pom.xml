@@ -68,4 +68,61 @@
             </plugin>
         </plugins>
     </build>
+    
+    <inceptionYear>2012</inceptionYear>
+    <mailingLists>
+        <mailingList>
+            <name>KP MavenTools - Announce</name>
+            <post>maventools-announce@kaiserpfalz-edv.de</post>
+            <subscribe>maventools-announce+subscribe@kaiserpfalz-edv.de</subscribe>
+            <unsubscribe>maventools-announce+unsubscribe@kaiserpfalz-edv.de</unsubscribe>
+        </mailingList>
+        <mailingList>
+            <name>KP MavenTools - User</name>
+            <post>maventools-user@kaiserpfalz-edv.de</post>
+            <subscribe>maventools-user+subscribe@kaiserpfalz-edv.de</subscribe>
+            <unsubscribe>maventools-user+unsubscribe@kaiserpfalz-edv.de</unsubscribe>
+        </mailingList>
+        <mailingList>
+            <name>KP MavenTools - Developer</name>
+            <post>maventools-developer@kaiserpfalz-edv.de</post>
+            <subscribe>maventools-developer+subscribe@kaiserpfalz-edv.de</subscribe>
+            <unsubscribe>maventools-developer+unsubscribe@kaiserpfalz-edv.de</unsubscribe>
+        </mailingList>
+    </mailingLists>
+    
+    <developers>
+        <developer>
+            <id>klenkes</id>
+            <name>Roland T. Lichti</name>
+            <email>rlichti@kaiserpfalz-edv.de</email>
+            <organization>Kaiserpfalz EDV-Service</organization>
+            <organizationUrl>http://www.kaiserpfalz-edv.de</organizationUrl>
+            <timezone>Europe/Berlin</timezone>
+            <roles>
+                <role>Lead</role>
+                <role>Developer</role>
+            </roles>
+        </developer>
+    </developers>
+    
+    <organization>
+        <name>Kaiserpfalz EDV-Service</name>
+        <url>http://www.kaiserpfalz-edv.de</url>
+    </organization>
+    
+    <issueManagement>
+        <system>Jira</system>
+        <url>https://devzone.kaiserpfalz-edv.de/issues/KPM</url>
+    </issueManagement>
+    
+    <ciManagement>
+        <system>Jenkins</system>
+        <url>https://devzone.kaiserpfalz-edv.de/ci/</url>
+    </ciManagement>
+
+    <scm>
+        <connection>scm:git:ssh://github.com/KaiserpfalzEdv/apacheds-maven-plugin.git</connection>
+        <developerConnection>scm:git:ssh://github.com/KaiserpfalzEdv/apacheds-maven-plugin.git</developerConnection>
+    </scm>
 </project>
