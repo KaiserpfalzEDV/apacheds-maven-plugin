@@ -62,7 +62,7 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>de.kaiserpfalzEdv.maven</groupId>
+                <groupId>de.kaiserpfalz-edv.maven</groupId>
                 <artifactId>apacheds-maven-plugin</artifactId>
                 <version>${project.version}</version>
                 <configuration>
